@@ -1,0 +1,116 @@
+{% if item.1.SSLonly is defined and item.1.SSLonly == true and  item.1.CertbotSSL is defined and item.1.CertbotSSL == true %}
+
+server {
+    if ($host = www.{{ item.1.name }}) {
+        return 301 https://$host$request_uri;
+    }
+
+    if ($host = {{ item.1.name }}) {
+        return 301 https://$host$request_uri;
+    }
+
+    listen 80;
+    server_name {{ item.1.name }} www.{{ item.1.name }};
+    return 404;
+
+}
+
+{% endif %}
+
+server {
+    {% if item.1.CertbotSSL is defined and item.1.CertbotSSL == true %}
+    {% if item.1.SSLonly is undefined or item.1.SSLonly == false %}
+
+    listen 80;
+
+    {% endif %}
+    listen 443 ssl;
+    server_name {{ item.1.name }} www.{{ item.1.name }};
+
+    # SSL config
+    ssl_certificate /etc/letsencrypt/live/{{ item.1.name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ item.1.name }}/privkey.pem;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_timeout 1d;
+    ssl_protocols TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:!DSS";
+
+    {% else %}
+
+    listen 80;
+    server_name {{ item.1.name }} www.{{ item.1.name }};
+
+    {% endif %}
+
+    root /home/{{ item.0.name }}{{ item.1.docroot | default("/deployments/current/") }};
+
+    default_type         text/html;
+
+    index index.php index.html;
+
+    # Block the following folders to the outside
+    location ~ /(var|sql|pdf_invoices|purchase_orders\/|vendor|etc) {
+        deny all;
+        return 404;
+    }
+
+    # Block the following files from being accessed
+    location ~ /\.(sql|tar|md|log|conf|yml|yaml|json|lock|osw|bakop|sh|rb|gulpfile.js|webpack.config.js|swp) {
+        deny all;
+        return 404;
+    }
+
+    #Block direct acces to the .well-known
+    location ~ /\.(?!well-known).* {
+        deny all;
+        return 404;
+    }
+
+    # .htaccess replacement
+    location / {
+        try_files $uri $uri/ /dispatcher.php?$args;
+
+        rewrite ^/-title([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+        rewrite ^/-sku([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+        rewrite ^/(.*)-title([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/-productcode([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+        rewrite ^/(.*)-productcode([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/-price([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+        rewrite ^/(.*)-price([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/-orderby([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+        rewrite ^/(.*)-orderby([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-title([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-productcode([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-price([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-orderby([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-title([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-productcode([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-price([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-orderby([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+        rewrite ^/(.*)-mf-([0-9]*).html$ /manufacturers.php?manufacturerid=$2 permanent;
+        rewrite ^/(.*)-sp-([0-9]*).html$ /pages.php?pageid=$2 permanent;
+        rewrite ^/(.*)-p-([0-9]*)(.*).html$ /product.php?productid=$2&$3 permanent;
+        rewrite ^/(.*)-c-([0-9]*).html$ /home.php?cat=$2 permanent;
+        rewrite ^/(.*)clients/(.*)$ / permanent;
+    }
+
+    location ~ .php$ {
+        try_files $uri $uri/ /index.php?$args;
+        fastcgi_index index.php;
+        {% if item.0.phpVersion is defined or phpVersionDefault is defined %}
+        fastcgi_pass unix:/var/run/php{{ item.0.phpVersion | default(phpVersionDefault) }}-fpm-{{ item.0.name }}.sock;
+        {% endif %}
+        fastcgi_ignore_client_abort on;
+        fastcgi_read_timeout 1200;
+        fastcgi_send_timeout 1200;
+        include fastcgi_params;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+    }
+
+    # logging
+    access_log /home/{{ item.0.name }}/{{ item.0.name }}_access.log combined buffer=256K flush=1m;
+    error_log /home/{{ item.0.name }}/{{ item.0.name }}_error.log ;
+}

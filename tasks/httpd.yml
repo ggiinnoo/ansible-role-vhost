@@ -1,0 +1,32 @@
+---
+
+- name: Setting up Folders
+  file:
+    path: "/etc/httpd/{{ item }}"
+    state: "directory"
+  with_items:
+    - sites-available
+    - sites-enabled
+
+- name: Installing vhost
+  template:
+    src: "{{ httpd_vhost }}"
+    dest: /etc/httpd/sites-available/{{ item.1.name }}.conf
+  with_subelements:
+    - "{{ Users }}"
+    - "Domains"
+
+- name: Placing symbolic link
+  file:
+    src: /etc/httpd/sites-available/{{ item.1.name }}.conf
+    state: link
+    dest: /etc/httpd/sites-enabled/{{ item.1.name }}.conf
+  with_subelements:
+    - "{{ Users }}"
+    - "Domains"
+  notify: restart httpd
+
+- name: Insert include into in httpd.conf
+  lineinfile:
+    path: "/etc/httpd/conf/httpd.conf"
+    line: "IncludeOptional sites-enabled/*.conf"

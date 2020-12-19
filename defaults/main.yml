@@ -1,0 +1,7 @@
+---
+
+# httpd vhost
+httpd_vhost: "{{ role_path }}/templates/hosts.conf.j2"
+
+# nginx vhost
+nginx_vhost: "{{ role_path }}/templates/hosts-nginx.conf.j2"

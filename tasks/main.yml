@@ -1,0 +1,7 @@
+---
+
+- import_tasks: httpd.yml
+  when: webService == "httpd"
+
+- import_tasks: nginx.yml
+  when: webService == "nginx"

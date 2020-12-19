@@ -1,0 +1,12 @@
+galaxy_info:
+  author: Gino Jansen
+  description: Configure an openstack volume
+
+  license: license (GPLv2, CC-BY, etc)
+
+  min_ansible_version: 2.7
+
+  galaxy_tags:
+    domain
+    nginx
+    apache

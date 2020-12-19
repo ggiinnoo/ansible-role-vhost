@@ -1,0 +1,13 @@
+---
+
+- name: restart httpd
+  service: 
+    name: httpd
+    state: started
+    enabled: yes
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes

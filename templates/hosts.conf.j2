@@ -1,0 +1,51 @@
+<VirtualHost *:80>
+	ServerName {{ item.1.name }}
+	ServerAlias www.{{ item.1.name }}
+	DocumentRoot /home/{{ item.0.name }}{{ item.1.docroot | default("/deployments/current/") }}
+	ErrorLog /home/{{ item.0.name }}/error.log
+	CustomLog /home/{{ item.0.name }}/requests.log combined
+
+	<Directory /home/{{ item.0.name }}{{ item.1.docroot | default("/deployments/current/") }}>
+		Options Indexes FollowSymLinks
+		AllowOverride all
+		Require all granted
+	</Directory>
+
+	<FilesMatch \.php$>
+		{% if item.0.phpVersion is defined or phpVersionDefault is defined %}
+		SetHandler "proxy:unix:/var/run/php{{ item.0.phpVersion | default(phpVersionDefault) }}-fpm-{{ item.0.name }}.sock|fcgi://localhost"
+		{% endif %}
+	</FilesMatch>
+
+</VirtualHost>
+
+{% if item.1.CertbotSSL is defined and item.1.CertbotSSL == true %}
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+	ServerName {{ item.1.name }}
+	ServerAlias www.{{ item.1.name }}
+	DocumentRoot /home/{{ item.0.name }}{{ item.1.docroot | default("/deployments/current/") }}
+	ErrorLog /home/{{ item.0.name }}/error.log
+	CustomLog /home/{{ item.0.name }}/requests.log combined
+
+	<Directory /home/{{ item.0.name }}{{ item.1.docroot | default("/deployments/current/") }}>
+		Options Indexes FollowSymLinks
+		AllowOverride all
+		Require all granted
+	</Directory>
+
+	<FilesMatch \.php$>
+		{% if item.0.phpVersion is defined or phpVersionDefault is defined %}
+		SetHandler "proxy:unix:/var/run/php{{ item.0.phpVersion | default(phpVersionDefault) }}-fpm-{{ item.0.name }}.sock|fcgi://localhost"
+		{% endif %}
+	</FilesMatch>
+
+	SSLEngine on
+	SSLCipherSuite ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:!DSS
+	SSLCertificateFile /etc/letsencrypt/live/{{ item.1.name }}/cert.pem
+	SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.1.name }}/privkey.pem
+	SSLCertificateChainFile /etc/letsencrypt/live/{{ item.1.name }}/chain.pem
+
+</VirtualHost>
+</IfModule>
+{% endif %}
