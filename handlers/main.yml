@@ -3,11 +3,11 @@
 - name: restart httpd
   service: 
     name: httpd
-    state: started
+    state: restarted
     enabled: yes
 
 - name: restart nginx
   service:
     name: nginx
-    state: started
+    state: restarted
     enabled: yes
