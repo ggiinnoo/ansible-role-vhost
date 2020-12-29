@@ -25,9 +25,9 @@ Example Playbook
 
     ---
     - name: setup domain names
-      hosts: groupWeb
+      hosts: webservers
       roles:
-       - domainSetup
+       - ggiinnoo.vhost
 
 License
 -------

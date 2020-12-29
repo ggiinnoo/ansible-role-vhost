@@ -1,0 +1,12 @@
+    location ~ .php$ {
+        try_files $uri $uri/ /index.php?$args;
+        fastcgi_index index.php;
+        fastcgi_pass unix:/var/run/php{{ item.0.phpVersion | default(phpVersionDefault) }}-fpm-{{ item.0.name }}.sock;
+        fastcgi_ignore_client_abort on;
+        fastcgi_read_timeout 1200;
+        fastcgi_send_timeout 1200;
+        include fastcgi_params;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+    }

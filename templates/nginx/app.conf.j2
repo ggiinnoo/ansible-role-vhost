@@ -1,0 +1,51 @@
+root /home/{{ item.0.name }}{{ item.1.docroot | default("/deployments/current/") }};
+
+default_type         text/html;
+
+index index.php index.html;
+
+# Block the following folders to the outside
+location ~ /(var|sql|pdf_invoices|purchase_orders\/|vendor|etc) {
+    deny all;
+    return 404;
+}
+
+# Block the following files from being accessed
+location ~ /\.(sql|tar|md|log|conf|yml|yaml|json|lock|osw|bakop|sh|rb|gulpfile.js|webpack.config.js|swp) {
+    deny all;
+    return 404;
+}
+
+#Block direct acces to the .well-known
+location ~ /\.(?!well-known).* {
+    deny all;
+    return 404;
+}
+
+# .htaccess replacement
+location / {
+    try_files $uri $uri/ /dispatcher.php?$args;
+
+    rewrite ^/-title([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+    rewrite ^/-sku([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+    rewrite ^/(.*)-title([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/-productcode([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+    rewrite ^/(.*)-productcode([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/-price([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+    rewrite ^/(.*)-price([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/-orderby([0-1]*)-p-([0-9]*)-c-\.html$ / permanent;
+    rewrite ^/(.*)-orderby([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-title([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-productcode([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-price([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-orderby([0-1]*)-p-([0-9]*)-c-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-title([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-productcode([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-price([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-orderby([0-1]*)-p-([0-9]*)-mf-([0-9]*).html$ / permanent;
+    rewrite ^/(.*)-mf-([0-9]*).html$ /manufacturers.php?manufacturerid=$2 permanent;
+    rewrite ^/(.*)-sp-([0-9]*).html$ /pages.php?pageid=$2 permanent;
+    rewrite ^/(.*)-p-([0-9]*)(.*).html$ /product.php?productid=$2&$3 permanent;
+    rewrite ^/(.*)-c-([0-9]*).html$ /home.php?cat=$2 permanent;
+    rewrite ^/(.*)clients/(.*)$ / permanent;
+}
