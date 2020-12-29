@@ -1,4 +1,5 @@
 galaxy_info:
+  role_name: vhost
   author: Gino Jansen
   description: Configure vhost's
 
