@@ -1,6 +1,6 @@
 galaxy_info:
   author: Gino Jansen
-  description: Configure an openstack volume
+  description: Configure vhost's
 
   license: license (GPLv2, CC-BY, etc)
 
@@ -10,3 +10,4 @@ galaxy_info:
     domain
     nginx
     apache
+    httpd

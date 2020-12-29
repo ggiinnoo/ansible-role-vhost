@@ -1,7 +1,14 @@
 ---
 
 # httpd vhost
-httpd_vhost: "{{ role_path }}/templates/hosts.conf.j2"
+httpd_vhost: "{{ role_path }}/templates/httpd/default.conf.j2"
 
 # nginx vhost
-nginx_vhost: "{{ role_path }}/templates/hosts-nginx.conf.j2"
+nginx_vhost: "{{ role_path }}/templates/nginx/default.conf.j2"
+
+# Custom vhost template's
+nginxVhostCustom: false
+nginxVhostLocation: "{{ playbook_dir }}/templates/app"
+
+httpdVhostCustom: false
+httpdVhostLocation: "{{ playbook_dir }}/templates/app"

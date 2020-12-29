@@ -1,5 +1,13 @@
 ---
 
+- name: Link custom folder inside template folder
+  file:
+    src: "{{ nginxVhostLocation }}"
+    dest: "{{ role_path }}/templates/nginx/custom"
+    state: link
+  delegate_to: localhost
+  when: nginxVhostCustom
+
 - name: Setting up Folders
   file:
     path: "/etc/nginx/{{ item }}"

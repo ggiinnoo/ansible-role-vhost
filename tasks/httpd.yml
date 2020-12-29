@@ -1,5 +1,13 @@
 ---
 
+- name: Link custom folder inside template folder
+  file:
+    src: "{{ httpdVhostLocation }}"
+    dest: "{{ role_path }}/templates/httpd/custom"
+    state: link
+  delegate_to: localhost
+  when: httpdVhostCustom
+
 - name: Setting up Folders
   file:
     path: "/etc/httpd/{{ item }}"
@@ -15,6 +23,7 @@
   with_subelements:
     - "{{ Users }}"
     - "Domains"
+  notify: restart httpd
 
 - name: Placing symbolic link
   file:
