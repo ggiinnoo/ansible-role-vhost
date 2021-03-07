@@ -16,6 +16,15 @@
     - sites-available
     - sites-enabled
 
+- name: Setting up log folder users
+  file:
+    path: "/home/{{ item.name }}/logs"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    state: "directory"
+  with_items:
+    - "{{ Users }}"
+
 - name: Installing vhost
   template:
     src: "{{ nginx_vhost }}"
