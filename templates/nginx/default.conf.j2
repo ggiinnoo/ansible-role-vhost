@@ -1,40 +1,43 @@
 # {{ ansible_managed }}
-{% if item.1.SSLonly is defined and item.1.SSLonly == true and  item.1.CertbotSSL is defined and item.1.CertbotSSL == true %}
 server {
     listen 80;
     server_name {{ item.1.name }} www.{{ item.1.name }} {% for alias in item.1.aliases|default([]) %}{{ alias }}{% endfor %};
 
+    {% if item.1.ssl|default(false) and item.1.forcessl|default(true) %}
     location / {
         return 301 https://$host$request_uri;
     }
-    return 404;
-}
-{% endif %}
+    {% else %}
 
-server {
-    {% if item.1.CertbotSSL is defined and item.1.CertbotSSL == true %}
-    {% if item.1.SSLonly is undefined or item.1.SSLonly == false %}
-
-    listen 80;
-
+    {% if item.1.app is defined %}
+    {% include "custom/" + item.1.app + ".conf.j2" %}
+    {% elif item.1.app is not defined %}
+    {% include "app.conf.j2" %}
     {% endif %}
-    listen 443 ssl;
-    server_name {{ item.1.name }} www.{{ item.1.name }} {% for alias in item.1.aliases|default([]) %}{{ alias }}{% endfor %};
+
+    {% if item.0.phpVersion is defined or phpVersionDefault is defined %}
+    {% include "php.conf.j2" %}
+    {% endif %}
+    {% endif %}
+    # logging
+    access_log /home/{{ item.0.name }}/logs/{{ item.1.name }}_access.log ;
+    error_log /home/{{ item.0.name }}/logs/{{ item.1.name }}_error.log ;
+}
+
+{% if item.1.ssl is defined or serverSignedCertificate is defined%}
+server {
+    listen 443 ssl http2;
+    server_name {{ item.1.name }} www.{{ item.1.name }} {% for alias in item.1.aliases|default([]) %}{{ alias }} {% endfor %};
 
     # SSL config
-    ssl_certificate /etc/letsencrypt/live/{{ item.1.name }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ item.1.name }}/privkey.pem;
+    ssl_certificate {{ item.1.ssl|default(serverSignedCertificate) }};
+    ssl_certificate_key {{ item.1.ssl|default(serverSignedCertificate) }};
+
     ssl_session_cache shared:SSL:50m;
     ssl_session_timeout 1d;
     ssl_protocols TLSv1.2;
     ssl_prefer_server_ciphers on;
     ssl_ciphers "ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:!DSS";
-    {% else %}
-
-    listen 80;
-    server_name {{ item.1.name }} www.{{ item.1.name }} {% for alias in item.1.aliases|default([]) %}{{ alias }}{% endfor %};
-
-    {% endif %}
     
     {% if item.1.app is defined %}
     {% include "custom/" + item.1.app + ".conf.j2" %}
@@ -47,6 +50,7 @@ server {
     {% endif %}
 
     # logging
-    access_log /home/{{ item.0.name }}/{{ item.0.name }}_access.log ;
-    error_log /home/{{ item.0.name }}/{{ item.0.name }}_error.log ;
+    access_log /home/{{ item.0.name }}/logs/{{ item.1.name }}_access.log ;
+    error_log /home/{{ item.0.name }}/logs/{{ item.1.name }}_error.log ;
 }
+{% endif %}

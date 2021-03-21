@@ -12,3 +12,6 @@ nginxVhostLocation: "{{ playbook_dir }}/templates/app"
 
 httpdVhostCustom: false
 httpdVhostLocation: "{{ playbook_dir }}/templates/app"
+
+# Self signed certificate location. Only uncomment when you have one.
+#serverSignedCertificate: "/etc/pki/tls/private/serversigned.pem"
