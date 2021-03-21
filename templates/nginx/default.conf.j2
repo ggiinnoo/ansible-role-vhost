@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 server {
     listen 80;
-    server_name {{ item.1.name }} www.{{ item.1.name }} {% for alias in item.1.aliases|default([]) %}{{ alias }}{% endfor %};
+    server_name {{ item.1.name }} www.{{ item.1.name }} {% for alias in item.1.aliases|default([]) %}{{ alias }} {% endfor %};
 
     {% if item.1.ssl|default(false) and item.1.forcessl|default(true) %}
     location / {
