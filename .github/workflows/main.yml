@@ -1,0 +1,77 @@
+---
+name: Ansible role vhost
+
+on:
+  push:
+    branches:
+     - 'release/**'
+     - 'feature/**'
+
+defaults:
+  run:
+    working-directory: 'ggiinnoo.vhost'
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          path: 'ggiinnoo.vhost'
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install yamllint
+
+      - name: Lint code.
+        run: |
+          yamllint .
+  CentOS:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: ['centos7']
+        service: ['nginx']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: "${{ github.repository }}"
+      - uses: gofrolist/molecule-action@v2
+        env:
+          DOCKER_IMAGE: ${{ matrix.os }}
+          DOCKER_SERVICE: ${{ matrix.service }}
+  Debian:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: ['debian10', 'debian11']
+        service: ['nginx']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: "${{ github.repository }}"
+      - uses: gofrolist/molecule-action@v2
+        env:
+          DOCKER_IMAGE: ${{ matrix.os }}
+          DOCKER_SERVICE: ${{ matrix.service }}
+  Ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: ['ubuntu20-04']
+        service: ['nginx']
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: "${{ github.repository }}"
+      - uses: gofrolist/molecule-action@v2
+        env:
+          DOCKER_IMAGE: ${{ matrix.os }}
+          DOCKER_SERVICE: ${{ matrix.service }}

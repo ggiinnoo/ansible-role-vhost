@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars:
+    webService: "nginx"
+    Users:
+      - name: "testUser"
+        Domains:
+          - name: "example.com"
+            docroot: /deployments/current/public/
+
+  pre_tasks:
+    - include_vars: "{{ ansible_os_family }}.yml"
+
+  roles:
+    - role: ggiinnoo.remi_repo
+      when: ansible_os_family == 'RedHat'
+    - role: ggiinnoo.nginx
+      version: 1.0.1
+    - role: ggiinnoo.php
+      version: 1.4.0
+    - ansible-role-vhost
