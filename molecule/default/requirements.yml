@@ -3,4 +3,4 @@
 - src: ggiinnoo.remi_repo
 
 - role: ggiinnoo.nginx
-  version: 1.1.1
+  version: 1.1.2
