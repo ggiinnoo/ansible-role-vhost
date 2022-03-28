@@ -1,7 +1,20 @@
 galaxy_info:
   role_name: vhost
+  namespace: ggiinnoo
   author: Gino Jansen
+  license: license (BSD, MIT)
   description: Configure vhost's
+  platforms:
+    - name: EL
+      versions:
+        - 7
+    - name: Debian
+      versions:
+        - Buster
+        - Bullseye
+    - name: Ubuntu
+      versions:
+        - focal
 
   license: license (GPLv2, CC-BY, etc)
 
