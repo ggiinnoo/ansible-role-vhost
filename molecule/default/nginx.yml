@@ -6,7 +6,7 @@
   vars:
     webService: "nginx"
     Users:
-      - name: "testUser"
+      - name: "ansible"
         Domains:
           - name: "example.com"
             docroot: /deployments/current/public/
