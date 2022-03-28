@@ -3,7 +3,7 @@
 - src: ggiinnoo.remi_repo
 
 - role: ggiinnoo.php
-  version: 1.4.0
+  version: 1.4.1
 
 - role: ggiinnoo.nginx
   version: 1.1.2
