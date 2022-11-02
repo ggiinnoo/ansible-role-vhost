@@ -24,6 +24,8 @@
     state: "directory"
   with_items:
     - "{{ Users }}"
+  loop_control:
+    label: "Creating logs folder: /home/{{ item.name }}/logs"
 
 - name: Installing vhost
   template:
@@ -33,6 +35,8 @@
     - "{{ Users }}"
     - "Domains"
   notify: restart httpd
+  loop_control:
+    label: "Creating vhost for: {{ item.1.name }} inside: /etc/nginx/sites-available/"
 
 - name: Placing symbolic link
   file:
@@ -43,6 +47,8 @@
     - "{{ Users }}"
     - "Domains"
   notify: restart httpd
+  loop_control:
+    label: "Linking: /etc/nginx/sites-available/{{ item.1.name }}.conf To: /etc/nginx/sites-enabled/{{ item.1.name }}.conf"
 
 - name: Insert include into in httpd.conf
   lineinfile:
