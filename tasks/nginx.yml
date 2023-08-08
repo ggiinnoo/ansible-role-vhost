@@ -1,6 +1,6 @@
 ---
 
-- name: Link custom folder inside template folder
+- name: Vhost | NGINX | Link custom folder inside template folder
   file:
     src: "{{ nginxVhostLocation }}"
     dest: "{{ role_path }}/templates/nginx/custom"
@@ -8,7 +8,7 @@
   delegate_to: localhost
   when: nginxVhostCustom
 
-- name: Setting up Folders
+- name: Vhost | NGINX | Setting up Folders
   file:
     path: "/etc/nginx/{{ item }}"
     state: "directory"
@@ -16,7 +16,7 @@
     - sites-available
     - sites-enabled
 
-- name: Setting up log folder users
+- name: Vhost | NGINX | Setting up log folder users
   file:
     path: "/home/{{ item.name }}/logs"
     owner: "{{ item.name }}"
@@ -27,7 +27,7 @@
   loop_control:
     label: "Creating logs folder: /home/{{ item.name }}/logs"
 
-- name: Installing vhost
+- name: Vhost | NGINX | Installing vhost
   template:
     src: "{{ nginx_vhost }}"
     dest: /etc/nginx/sites-available/{{ item.1.name }}.conf
@@ -38,7 +38,7 @@
   loop_control:
     label: "Creating vhost for: {{ item.1.name }} inside: /etc/nginx/sites-available/"
 
-- name: Placing symbolic link
+- name: Vhost | NGINX | Placing symbolic link
   file:
     src: /etc/nginx/sites-available/{{ item.1.name }}.conf
     state: link
@@ -49,9 +49,7 @@
   loop_control:
     label: "Linking: /etc/nginx/sites-available/{{ item.1.name }}.conf To: /etc/nginx/sites-enabled/{{ item.1.name }}.conf"
 
-- name: Place include in the nginx conf file
-  lineinfile:
-    path: "/etc/nginx/nginx.conf"
-    state: present
-    insertafter: "http {"
-    line: "include /etc/nginx/sites-enabled/*.conf;"
+- name: Vhost | NGINX | Place include in the nginx conf file
+  template:
+    src: "{{ nginxIncludeTemplateSrc }}"
+    dest: "{{ nginxIncludeTemplateDest }}"
