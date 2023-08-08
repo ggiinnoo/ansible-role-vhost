@@ -1,6 +1,6 @@
 ---
 
-- name: Link custom folder inside template folder
+- name: Vhost | HTTPD | Link custom folder inside template folder
   file:
     src: "{{ httpdVhostLocation }}"
     dest: "{{ role_path }}/templates/httpd/custom"
@@ -8,7 +8,7 @@
   delegate_to: localhost
   when: httpdVhostCustom
 
-- name: Setting up Folders
+- name: Vhost | HTTPD | Setting up Folders
   file:
     path: "/etc/httpd/{{ item }}"
     state: "directory"
@@ -16,7 +16,7 @@
     - sites-available
     - sites-enabled
 
-- name: Setting up log folder users
+- name: Vhost | HTTPD | Setting up log folder users
   file:
     path: "/home/{{ item.name }}/logs"
     owner: "{{ item.name }}"
@@ -27,7 +27,7 @@
   loop_control:
     label: "Creating logs folder: /home/{{ item.name }}/logs"
 
-- name: Installing vhost
+- name: Vhost | HTTPD | Installing vhost
   template:
     src: "{{ httpd_vhost }}"
     dest: /etc/httpd/sites-available/{{ item.1.name }}.conf
@@ -38,7 +38,7 @@
   loop_control:
     label: "Creating vhost for: {{ item.1.name }} inside: /etc/nginx/sites-available/"
 
-- name: Placing symbolic link
+- name: Vhost | HTTPD | Placing symbolic link
   file:
     src: /etc/httpd/sites-available/{{ item.1.name }}.conf
     state: link
@@ -50,7 +50,7 @@
   loop_control:
     label: "Linking: /etc/nginx/sites-available/{{ item.1.name }}.conf To: /etc/nginx/sites-enabled/{{ item.1.name }}.conf"
 
-- name: Insert include into in httpd.conf
+- name: Vhost | HTTPD | Insert include into in httpd.conf
   lineinfile:
     path: "/etc/httpd/conf/httpd.conf"
     line: "IncludeOptional sites-enabled/*.conf"

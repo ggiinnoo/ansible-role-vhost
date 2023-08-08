@@ -1,7 +1,13 @@
 ---
 
-- import_tasks: httpd.yml
-  when: webService == "httpd"
+- name: Vhost | Include HTTPD configuration
+  import_tasks: httpd.yml
+  when:
+    - webService == "httpd" or httpdRoleName in role_names
+    - Users is defined
 
-- import_tasks: nginx.yml
-  when: webService == "nginx"
+- name: Vhost | Include NGINX configuration
+  import_tasks: nginx.yml
+  when:
+    - webService == "nginx" or nginxRoleName in role_names
+    - Users is defined

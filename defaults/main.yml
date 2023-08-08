@@ -1,17 +1,32 @@
 ---
 
-# httpd vhost
-httpd_vhost: "{{ role_path }}/templates/httpd/default.conf.j2"
-
-# nginx vhost
+## NGINX ##
 nginx_vhost: "{{ role_path }}/templates/nginx/default.conf.j2"
 
-# Custom vhost template's
+nginxIncludeTemplateSrc: "{{ role_path }}/templates/nginx/vhost.conf.j2"
+nginxIncludeTemplateDest: "/etc/nginx/conf.d/vhost.conf"
+
 nginxVhostCustom: false
 nginxVhostLocation: "{{ playbook_dir }}/templates/app"
 
+nginxRoleName: "ggiinnoo.nginx" # role name for inclusion
+###########
+## HTTPD ##
+
+# httpd vhost
+httpd_vhost: "{{ role_path }}/templates/httpd/default.conf.j2"
+
+
+# Custom vhost template's
 httpdVhostCustom: false
 httpdVhostLocation: "{{ playbook_dir }}/templates/app"
 
+httpdRoleName: "ggiinnoo.webserver"
+###########
+
 # Self signed certificate location. Only uncomment when you have one.
 #serverSignedCertificate: "/etc/pki/tls/private/serversigned.pem"
+
+webService: "" # by default empty. set it in the playbook
+
+Users: [] # left blank. Set it in the playbook
